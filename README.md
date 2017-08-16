@@ -2,6 +2,8 @@
 
 # `archetype-party`
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/gregswindle/archetype-party.svg)](https://greenkeeper.io/)
+
 [![Swagger Validity][swagger-validity-image]][swagger-validity-url]
 [![Build Status][travis-image]][travis-url] [![Sonar coverage][sonar-coverage-img]][sonar-coverage-url] [![Quality Gate][sonar-gate-img]][sonar-gate-url] [![Complexity][sonar-complexity-img]][sonar-complexity-url] <br>[![NSP Status][nsp-img]][nsp-url] [![Dependency Status][daviddm-image]][daviddm-url] [![devDependencies Status][daviddm-dev-image]][daviddm-dev-url]<br>[![NPM version][npm-image]][npm-url] [![Readme Score][readme-score-img]][readme-score-url] [![PRs Welcome][makeapullrequest-image]][makeapullrequest-url] [![FOSSA Status][fossa-image]][fossa-url]  [![Coverage percentage][coveralls-image]][coveralls-url]
 
