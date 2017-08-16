@@ -1,0 +1,343 @@
+swagger: '2.0'
+info:
+  description: >-
+    [![Swagger
+    Validity](http://online.swagger.io/validator?url=http://api.swindle.net/cordova/v6/contacts/openapi.json)](http://online.swagger.io/validator/debug?url=http://api.swindle.net/cordova/v6/contacts/openapi.json)
+
+
+    The `Party` archetype represents an identifiable, addressable entity that
+    may have a legal status and that normally has autonomous control over (at
+    least some of) its actions.
+  version: 1.0.0
+  title: Party
+  termsOfService: >-
+    https://github.com/gregswindle/archetype-party/blob/master/TERMS_OF_SERVICE.md
+  contact:
+    email: greg@swindle.net
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: api.swindle.net
+basePath: /archetypes/parties
+tags:
+  - name: parties
+    description: TBD
+    externalDocs:
+      description: TBD
+      url: >-
+        https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-contacts/index.html
+schemes:
+  - http
+  - https
+paths:
+  '/{uuid}':
+    get:
+      tags:
+        - parties
+      summary: Retrieve a specific Party entity.
+      description: Retrieve a Party by its universally unique identifier (UUID).
+      produces:
+        - application/json
+        - application/xml
+      parameters:
+        - in: path
+          name: uuid
+          description: The univerally unique identifier associated with a Party.
+          required: true
+          type: string
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Party'
+        '404':
+          description: Not found
+          schema:
+            $ref: '#/definitions/ErrorResponse'
+      security:
+        - SMSESSION: []
+securityDefinitions:
+  SMSESSION:
+    type: apiKey
+    name: SMSESSION
+    in: header
+definitions:
+  Locale:
+    type: object
+    required:
+      - identifier
+      - name
+    properties:
+      identifier:
+        type: string
+      name:
+        type: string
+      description:
+        type: string
+  IsoCountryCode:
+    allOf:
+      - $ref: '#/definitions/Locale'
+      - description: The ISO 3166 alphabetic codes for countries.
+      - properties:
+          alphabeticThreeCharCode:
+            type: string
+          numericCode:
+            type: string
+          officialName:
+            type: string
+  Address:
+    discriminator: type
+    type: object
+    description: Represents information that can be used to contact a Party.
+    required:
+      - type
+      - value
+    properties:
+      type:
+        default: 'null'
+        description: 'A string indicating what type of field this is, e.g., "work".'
+        type: string
+        enum:
+          - EMAIL_ADDRESS
+          - GEOGRAPHIC_ADDRESS
+          - TELECOM_ADDRESS
+          - URL_ADDRESS
+      validFrom:
+        default: 'null'
+        description: The date on which the RegisteredIdentifier went into effect.
+        format: date
+        type: string
+      validTo:
+        default: 'null'
+        description: The date on which the RegisteredIdentifier expired.
+        format: date
+        type: string
+      value:
+        default: 'null'
+        description: The full address formatted for display.
+        type: string
+  EmailAddress:
+    allOf:
+      - $ref: '#/definitions/Address'
+  GeographicAddress:
+    allOf:
+      - $ref: '#/definitions/Address'
+      - description: Represents a geographic location at which a Party may be contacted.
+      - properties:
+          addressLines:
+            description: >-
+              One or more lines that physically identify a location. The first
+              line of an address is often a building name, a building number and
+              street, or postal box number; the other address lines are for
+              location information that further localizes the physical point of
+              contact, e.g., suite or apartment number.
+            type: array
+            items:
+              type: string
+          city:
+            description: 'The name of a city, town, or locality.'
+            type: string
+          country:
+            $ref: '#/definitions/Locale'
+          regionOrState:
+            description: >-
+              The name of a geographical region within a country--in the USA,
+              the would be a state; in England, a county; and in Switzerland, a
+              canton.
+            type: string
+          zipOrPostalCode:
+            description: A code used to identify a geographic area.
+            type: string
+      - required:
+          - addressLines
+          - city
+          - regionOrState
+          - zipOrPostalCode
+  TelecomAddress:
+    allOf:
+      - $ref: '#/definitions/Address'
+      - description: >-
+          Represents a number that can contact a telephone, mobile phone, fax,
+          pager, or other telephonic device.
+      - properties:
+          areaCode:
+            description: The code for an area or city.
+            type: string
+          countryCode:
+            description: The number required to directly dial a particular country.
+            type: string
+          extension:
+            description: An extension accessible via the number.
+            type: string
+          nationalDirectDialingPrefix:
+            description: >-
+              The prefix required to make a call within a country between two
+              different cities, localities, or areas--generally dropped when
+              dialing from outside the country (with some exceptions).
+            type: string
+          number:
+            description: >-
+              The "telephone" number, which may be (arbitrarily) formatted into
+              one or mnemonic sequences of digits depending on local standards.
+            type: string
+          physicalType:
+            description: The type of device accessed by the TelecomAddress.
+            type: string
+            enum:
+              - phone
+              - fax
+              - mobile
+              - pager
+              - sms
+  UrlAddress:
+    allOf:
+      - $ref: '#/definitions/Address'
+      - description: >-
+          The unqiue address of a resource, e.g., Web page, on a computer
+          network.
+  PreferenceOption:
+    description: Specifies the name of a possible option and its description.
+    type: object
+    properties:
+      description:
+        description: A succinct summary of the PreferenceOption.
+        type: string
+      name:
+        description: The PreferenceOption's name.
+        type: string
+  PreferenceType:
+    description: >-
+      Specifies the name, a description, and a range of PreferenceOptions for a
+      Preference.
+    type: object
+    properties:
+      description:
+        description: A succinct summary of the PreferenceType.
+        type: string
+      name:
+        description: The classification name of the Perference range.
+        type: string
+      options:
+        description: A collection of one or more PreferenceOptions.
+        type: array
+        items:
+          $ref: '#/definitions/PreferenceOption'
+  Preference:
+    description: >-
+      Represents a Party's expressed choice of (or liking for) something, often
+      from a set of possible or offered options.
+    type: object
+    properties:
+      option:
+        $ref: '#/definitions/PreferenceOption'
+      preferenceWeight:
+        type: integer
+      type:
+        $ref: '#/definitions/PreferenceType'
+  RegisteredIdentifier:
+    type: object
+    description: >-
+      The RegisteredIdentifier represents an identifier for a Party that has
+      been assigned by a recognized or statutory body.
+    properties:
+      identifier:
+        type: string
+        description: >-
+          A string that signifies a Party. The identifier's value is unique in
+          the context of time and the registrationAuthority that assigned it.
+      registrationAuthority:
+        description: >-
+          Represents the recognized or statutory body responsible for assigning
+          the RegisteredIdentifier and associating it with a Party.
+        type: string
+      type:
+        description: A value that classifies the RegisteredIdentifier
+        type: string
+        enum:
+          - VZID
+          - ENTERPRISE_ID
+          - EMPLID
+          - SSN
+          - ONE_WORLD
+      validFrom:
+        description: The date on which the RegisteredIdentifier went into effect.
+        type: string
+        format: date
+        default: 'null'
+      validTo:
+        description: The date on which the RegisteredIdentifier expired.
+        type: string
+        format: date
+        default: 'null'
+  PartyRole:
+    type: object
+    description: >-
+      Captures the semantics of the role played by a Party in a particular
+      PartyRelationship.
+    properties:
+      description:
+        description: A summary of the PartyRole.
+        type: string
+      name:
+        description: The name of the PartyRole.
+        type: string
+      party:
+        $ref: '#/definitions/Party'
+  Party:
+    type: object
+    description: >-
+      Represents an identifiable, addressable entity that may have a legal
+      status and that normally has autonomous control over (at least some of)
+      its actions.
+    properties:
+      uuid:
+        type: string
+        description: A globally unique identifier.
+      addresses:
+        type: array
+        items:
+          $ref: '#/definitions/Address'
+        default: '[]'
+        description: An array of the Party's addresses.
+      description:
+        type: string
+        default: 'null'
+        description: An optional description of the Party.
+      preferences:
+        description: A list of Preferences associated with the Party.
+        type: array
+        items:
+          $ref: '#/definitions/Preference'
+        default: '[]'
+      registeredIds:
+        type: array
+        items:
+          $ref: '#/definitions/RegisteredIdentifier'
+        default: '[]'
+        description: >-
+          An identifier for a Party that has been assigend by a recognized or
+          statutory body.
+      roles:
+        type: array
+        items:
+          $ref: '#/definitions/PartyRole'
+        default: '[]'
+        description: An array of the Party's roles.
+  ErrorResponse:
+    type: object
+    description: Apigee's default error response object.
+    properties:
+      fault:
+        type: object
+        properties:
+          detail:
+            type: object
+            properties:
+              errorcode:
+                type: string
+          faultstring:
+            type: string
+externalDocs:
+  description: Cordova Plugin API for `cordova-plugin-contacts`.
+  url: >-
+    https://cordova.apache.org/docs/en/latest/reference/cordova-plugin-contacts/index.html
